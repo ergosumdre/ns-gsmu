@@ -18,14 +18,14 @@ ui <- fluidPage(
 
         mainPanel(
             tabsetPanel(type = "tabs",
-                        tabPanel("Line Chart", 
+                        tabPanel("Engagement Line Chart", 
                                  fluidRow(
-                                     column(8, plotOutput("line_plot_rep")),
+                                     column(12, plotOutput("line_plot_rep")),
                                      column(12, plotOutput("line_plot_dem"))
                                  )),
                         tabPanel("Engagement Histogram", 
                                  fluidRow(
-                                     column(8, plotOutput("histogram_rep")),
+                                     column(12, plotOutput("histogram_rep")),
                                      column(12, plotOutput("histogram_dem"))
                                  ))
         )
@@ -34,7 +34,7 @@ ui <- fluidPage(
 )
 
 server <- function(input, output) {
-    dt <- data.table::fread("/Users/dre/Downloads/nic_study/data/state_fb_covid_2020.csv", integer64 = "character")
+    dt <- data.table::fread("./data/state_fb_covid_2020.csv", integer64 = "character")
     rep <- dt %>% filter(gov_party == "republican")
     dem <- dt %>% filter(gov_party == "democratic")
     
@@ -66,6 +66,8 @@ server <- function(input, output) {
                                             logged_daily_total_interactions = log(daily_total_interactions),
                                             logged_daily_shares = log(daily_shares))
         
+        logged_rep <- logged_rep %>% select(logged_daily_comments, logged_daily_negative_eng, logged_daily_positive_eng,
+                                            logged_daily_total_interactions, logged_daily_shares)
         logged_rep %>%
             keep(is.numeric) %>% 
             gather() %>% 
@@ -86,6 +88,8 @@ server <- function(input, output) {
                                             logged_daily_positive_eng = log(daily_positive_eng),
                                             logged_daily_total_interactions = log(daily_total_interactions),
                                             logged_daily_shares = log(daily_shares))
+        logged_dem <- logged_dem %>% select(logged_daily_comments, logged_daily_negative_eng, logged_daily_positive_eng,
+                                            logged_daily_total_interactions, logged_daily_shares)
         
         logged_dem %>%
             keep(is.numeric) %>% 
