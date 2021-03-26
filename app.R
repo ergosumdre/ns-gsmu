@@ -1,5 +1,8 @@
 library(shiny)
-
+library("dplyr")
+library("data.table")
+library("ggplot2")
+library("tidyverse")
 ui <- fluidPage(
 
     titlePanel("Data Exploration"),
