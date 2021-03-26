@@ -3,6 +3,8 @@ library("dplyr")
 library("data.table")
 library("ggplot2")
 library("tidyverse")
+
+
 ui <- fluidPage(
 
     titlePanel("Data Exploration"),
@@ -32,13 +34,11 @@ ui <- fluidPage(
 )
 
 server <- function(input, output) {
-    dt <- data.table::fread("/data/state_fb_covid_2020.csv", integer64 = "character")
+    dt <- data.table::fread("/Users/dre/Downloads/nic_study/data/state_fb_covid_2020.csv", integer64 = "character")
     rep <- dt %>% filter(gov_party == "republican")
     dem <- dt %>% filter(gov_party == "democratic")
     
     output$line_plot_rep <- renderPlot({
-        library("data.table")
-        library("dplyr")
 
         ggplot(rep) +
             geom_line(aes(Created, log(daily_positive_eng)), color="blue") +
