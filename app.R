@@ -1,32 +1,38 @@
-library(shiny)
+library("shiny")
 library("dplyr")
 library("data.table")
 library("ggplot2")
 library("tidyverse")
+library("shinyjs")
 
 
 ui <- fluidPage(
+
 
     titlePanel("Data Exploration"),
 
     sidebarLayout(
         sidebarPanel(
             selectInput(inputId = "party",
-                        label = "Select Party",
+                        label = "Currently not working",
                         choices = c("Republican", "Democratic", "Both"))
         ),
 
         mainPanel(
             tabsetPanel(type = "tabs",
-                        tabPanel("Engagement Line Chart", 
+                        tabPanel("Raw Data", 
+                                 fluidRow(
+                                     column(12, dataTableOutput("data"))
+                                 )),
+                        tabPanel("Positive vs Negative Engagement", 
                                  fluidRow(
                                      column(12, plotOutput("line_plot_rep")),
                                      column(12, plotOutput("line_plot_dem"))
                                  )),
-                        tabPanel("Engagement Histogram", 
+                        tabPanel("Social Media Interactions vs Death Cases", 
                                  fluidRow(
-                                     column(12, plotOutput("histogram_rep")),
-                                     column(12, plotOutput("histogram_dem"))
+                                     column(12, plotOutput("line_plot_eng_vs_death_rep")),
+                                     column(12, plotOutput("line_plot_eng_vs_death_dem"))
                                  ))
         )
     )
@@ -38,11 +44,17 @@ server <- function(input, output) {
     rep <- dt %>% filter(gov_party == "republican")
     dem <- dt %>% filter(gov_party == "democratic")
     
+    
+    output$data = DT::renderDataTable({
+        dt
+    })
     output$line_plot_rep <- renderPlot({
 
         ggplot(rep) +
             geom_line(aes(Created, log(daily_positive_eng)), color="blue") +
+            geom_smooth(aes(Created, log(daily_positive_eng), alpha = .25), color = "green") +
             geom_line(aes(Created, log(daily_negative_eng)), color="red") +
+            geom_smooth(aes(Created, log(daily_negative_eng), alpha = .25), color = "pink") +
             facet_wrap(~state) +
             labs(title="Republican States")
         
@@ -51,7 +63,32 @@ server <- function(input, output) {
     output$line_plot_dem <- renderPlot({
         ggplot(dem) +
             geom_line(aes(Created, log(daily_positive_eng)), color="blue") +
+            geom_smooth(aes(Created, log(daily_positive_eng)), color = "green", alpha = .25) +
             geom_line(aes(Created, log(daily_negative_eng)), color="red") +
+            geom_smooth(aes(Created, log(daily_negative_eng)), color = "pink", alpha = .25) +
+            facet_wrap(~state) +
+            labs(title="Democratic States")
+        
+    })
+    
+    output$line_plot_eng_vs_death_rep <- renderPlot({
+        ggplot(rep) +
+            geom_line(aes(Created, log(daily_total_interactions)), color="blue") +
+            geom_smooth(aes(Created, log(daily_total_interactions)), color = "green", alpha = .25) +
+            geom_line(aes(Created, log(total_deaths)), color = "red") +
+            geom_smooth(aes(Created, log(total_deaths)), color = "pink", alpha = .25) +
+            facet_wrap(~state) +
+            labs(title="Republican States")
+        
+    })
+    
+    
+    output$line_plot_eng_vs_death_dem <- renderPlot({
+        ggplot(dem) +
+            geom_line(aes(Created, log(daily_total_interactions)), color="blue") +
+            geom_smooth(aes(Created, log(daily_total_interactions)), color = "green", alpha = .25) +
+            geom_line(aes(Created, log(total_deaths)), color = "red") +
+            geom_smooth(aes(Created, log(total_deaths)), color = "pink", alpha = .25) +
             facet_wrap(~state) +
             labs(title="Democratic States")
         
